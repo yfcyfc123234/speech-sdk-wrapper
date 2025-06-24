@@ -63,6 +63,8 @@ dependencies {
     // 其二是子工具类模块：subutil，它包含的工具类并不是很常用，它的出现是为了防止主工具类的臃肿。
     // blankj https://github.com/Blankj/AndroidUtilCode
     api "com.blankj:utilcodex:1.31.1"
+
+    api "androidx.lifecycle:lifecycle-livedata-core-ktx:2.9.0"
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
