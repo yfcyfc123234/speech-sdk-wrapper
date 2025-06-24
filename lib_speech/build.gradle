@@ -1,0 +1,104 @@
+plugins {
+    id 'com.android.library'
+
+    id 'kotlin-android'
+    // id 'kotlin-kapt'
+    id 'kotlin-parcelize'
+}
+
+android {
+    namespace 'com.yfc.speech'
+    compileSdk 35
+
+    defaultConfig {
+        minSdk 26
+        targetSdk 35
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    buildFeatures {
+        viewBinding = true
+        buildConfig = true
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+        }
+    }
+}
+
+dependencies {
+    api fileTree(include: ['*.jar'], dir: 'libs')
+    api files('libs/Msc.jar')
+
+    // AndroidUtilCode 是一个强大易用的安卓工具类库，它合理地封装了安卓开发中常用的函数，具有完善的 Demo 和单元测试，利用其封装好的 APIs 可以大大提高开发效率， 如今它主要包括两部分模块，
+    // 其一是主工具类模块：utilcode，其中的工具类是开发中常用到的；
+    // 其二是子工具类模块：subutil，它包含的工具类并不是很常用，它的出现是为了防止主工具类的臃肿。
+    // blankj https://github.com/Blankj/AndroidUtilCode
+    api "com.blankj:utilcodex:1.31.1"
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+apply plugin: 'maven-publish'
+
+// 全局配置
+def mGroupId = "com.yfc.lib"
+def mArtifactId = "speech-sdk-wrapper"
+def mVersion = "1.0.0"
+
+// 发布配置
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId = mGroupId
+            artifactId = mArtifactId
+            version = mVersion
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
+
+    repositories {
+        mavenLocal()
+    }
+}
+
+tasks.register('generateRepo', Zip) {
+    def mGroupIdFileDir = mGroupId.replace(".", "/")
+    def mGroupIdFileName = mGroupId.replace(".", "-")
+    def publishTask = tasks.named('publishReleasePublicationToMavenLocalRepository')
+    from publishTask.map {
+        it.getRepository().getUrl().toString() + mGroupIdFileDir
+    }
+    into mGroupIdFileName
+    archiveFileName.set("${mGroupIdFileName}.zip")
+}
